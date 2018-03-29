@@ -1,0 +1,97 @@
+# 特定のファイルタイプで読み込む
+[[plugins]]
+repo  = 'Quramy/tsuquyomi'
+on_ft = ['typescript']
+
+# インサートモードに入ったら読み込む
+
+[[plugins]]
+repo = 'Shougo/context_filetype.vim'
+
+[[plugins]]
+repo = 'Shougo/neoinclude.vim'
+
+[[plugins]]
+repo = 'Shougo/neocomplete.vim'
+
+hook_post_source='''
+let g:neocomplete#force_omni_input_patterns.python = '\h\w*\|[^.\t]\.\w*'
+let g:neocomplete#enable_at_startup = 1
+let g:neocomplete#max_list = 20
+let g:neocomplete#sources#syntax#min_keyword_length = 3
+let g:neocomplete#enable_smart_case = 1
+let g:neocomplete#enable_underbar_completion = 1
+let g:neocomplete#enable_camel_case_completion  =  1
+let g:neocomplete#auto_completion_start_length = 2
+'''
+
+[[plugins]]
+repo = 'justmao945/vim-clang'
+on_ft  =  ['c', 'cpp']
+
+[[plugins]]
+repo = 'Shougo/neosnippet-snippets'
+
+[[plugins]]
+repo = 'Shougo/neosnippet'
+
+
+# unite.vim を読み込んだら一緒に読み込む
+[[plugins]]
+repo      = 'Shougo/neomru.vim'
+on_source = ['unite.vim']
+
+# 特定のコマンドを打ったら読み込む
+[[plugins]]
+repo      = 'thinca/vim-prettyprint'
+on_cmd    = ['PP', 'PrettyPrint']
+
+# 特定のマッピングを使ったら読み込む
+# 又、gvim でしか利用しない
+[[plugins]]
+repo   = 'thinca/vim-fontzoom'
+on_cmd = ['Fontzoom']
+on_map = ['<Plug>(fontzoom-']
+gui    = 1
+
+[[plugins]]
+on_i = 1
+repo = "lambdalisue/vim-pyenv"
+on_ft=['py','python']
+
+[[plugins]]
+on_i = 1
+repo = "lambdalisue/vim-django-support"
+on_ft=['py','python']
+
+[[plugins]]
+repo= "davidhalter/jedi-vim"
+on_ft=['py','python']
+hook_add='''
+let g:jedi#completions_enabled = 1
+let g:jedi#auto_vim_configuration = 0
+let g:jedi#popup_select_first = 0
+let g:jedi#rename_command = '<C-P>'
+let g:jedi#goto_command = '<C-?>'
+let g:indent_guides_enable_on_vim_startup = 2
+set ts=4 sw=4 et
+let g:indent_guides_auto_colors=0
+autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  ctermbg=245
+autocmd VimEnter,Colorscheme * :hi IndentGuidesEven ctermbg=237
+let g:indent_guides_color_change_percent = 30
+let g:indent_guides_start_level=1
+let g:indent_guides_guide_size=4
+'''
+
+
+
+[[plugins]]
+on_i = 1
+repo = 'hynek/vim-python-pep8-indent'
+on_ft=['py','python']
+
+
+[[plugins]]
+on_i = 1
+repo = 'andviro/flake8-vim'
+on_ft=['py','python']
