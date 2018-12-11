@@ -1,6 +1,8 @@
 "scriptencoding utf-8
 set encoding=utf-8
+set termguicolors
 set number
+set clipboard=unnamed
 nmap <S-n><S-n> :set number<CR>
 nmap <S-d><S-d> :set nonumber<CR>
 noremap PP "0p"
