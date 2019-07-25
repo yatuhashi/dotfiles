@@ -1,0 +1,11 @@
+[color]
+	ui = true
+	diff = auto
+	status = auto
+	branch = auto
+[user]
+	email = yatuhashi@alice-tech.net
+	name = yatuhashi kei
+[core]
+	editor = vim
+	quotepath = false
