@@ -13,34 +13,8 @@ fi
 # Customize to your needs...
 
 export PATH=/Users/yatuhashi/Develop/Shell:$PATH
-export PATH=~/Build/vim/src:$PATH
-export EDITOR=/Users/yatuhashi/Build/vim/src/vim
 alias vim='/Users/yatuhashi/Build/nvim-osx64/bin/nvim "$@"'
-# alias vim='env LANG=ja_JP.UTF-8 /Users/yatuhashi/Build/vim/src/vim "$@"'
-#export PATH=/Users/yatuhashi/Build/pycrypto/src:$PATH
-
-export PYENV_ROOT=$HOME/.pyenv
-export PATH=$PYENV_ROOT/bin:$PATH
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
-
-if [ -x "`which go`" ]; then
-    export GOROOT=`go env GOROOT`
-    export GOPATH=$HOME/Develop/Go
-    export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
-fi
-
-# export PATH="$PATH:$HOME/.rvm/bin"
-# source ~/.rvm/scripts/rvm
-source $HOME/.cargo/env
-
-# export PATH=$PATH:/usr/local/src/scala/bin
-# export SCALA_HOME=/usr/local/src/scala
-
-export PATH="${HOME}/.scalaenv/bin:${PATH}"
-eval "$(scalaenv init -)"
-
-[[ -s /Users/yatuhashi/.gvm/scripts/gvm ]] && source /Users/yatuhashi/.gvm/scripts/gvm
+export EDITOR='/Users/yatuhashi/Build/nvim-osx64/bin/nvim "$@"'
 
 fpath=($HOME/.zprezto/modules/cd-bookmark(N-/) $fpath)
 autoload -Uz cd-bookmark
@@ -115,7 +89,7 @@ alias -s {gz,tgz,zip,lzh,bz2,tbz,Z,tar,arj,xz}=extract
 zstyle ':completion:*:processes' command "ps -u $USER"
 
 bg() {
-    /Users/yatuhashi/.gvm/pkgsets/go1.8.1/global/bin/change
+    /Users/yatuhashi/Build/dotfiles/change
     if [ -z "$BUFFER" ]; then
             osascript -e "tell application \"iTerm\"
                                         tell current window
