@@ -12,12 +12,8 @@ fi
 
 # Customize to your needs...
 
-export PATH=/Users/yatuhashi/Develop/Shell:$PATH
-alias vim='/Users/yatuhashi/Build/nvim-osx64/bin/nvim "$@"'
-export EDITOR='/Users/yatuhashi/Build/nvim-osx64/bin/nvim "$@"'
-
-fpath=($HOME/.zprezto/modules/cd-bookmark(N-/) $fpath)
-autoload -Uz cd-bookmark
+#fpath=($HOME/.zprezto/modules/cd-bookmark(N-/) $fpath)
+#autoload -Uz cd-bookmark
 
 alias dc='docker'
 alias d-c='docker-compose'
@@ -87,41 +83,6 @@ alias -s {gz,tgz,zip,lzh,bz2,tbz,Z,tar,arj,xz}=extract
 
 #kill procce name snipet
 zstyle ':completion:*:processes' command "ps -u $USER"
-
-bg() {
-    /Users/yatuhashi/Build/dotfiles/change
-    if [ -z "$BUFFER" ]; then
-            osascript -e "tell application \"iTerm\"
-                                        tell current window
-                                            tell current session
-                                                set background image to \"/Users/yatuhashi/Pictures/Fate/Haikei/result.jpg\"
-                                            end tell
-                                        end tell
-                                    end tell"
-            zle reset-prompt
-    else
-        zle accept-line
-    fi
-}
-zle -N bg
-bindkey '^m' bg
-
-rbg() {
-    if [ -z "$BUFFER" ]; then
-            osascript -e "tell application \"iTerm\"
-                            tell current window
-                                tell current session
-                                    set background image to \"/Users/yatuhashi/Pictures/zsh/100.png\"
-                                end tell
-                            end tell
-                        end tell"
-            zle reset-prompt
-    else
-        zle accept-line
-    fi
-}
-zle -N rbg
-bindkey '^h' rbg
 
 ##############################################
 #  Do Redo
@@ -280,32 +241,6 @@ function tmux_automatically_attach_session()
     fi
 }
 tmux_automatically_attach_session
-
-## tmux ssh split
-autoload -Uz add-zsh-hook
-function tmux_ssh_preexec() {
-    local command=$1
-    if [[ "$command" = *ssh* ]]; then
-        tmux setenv TMUX_SSH_CMD_$(tmux display -p "#I") $command
-    fi
-}
-add-zsh-hook preexec tmux_ssh_preexec
-
-## tmux ssh hostname
-function ssh() {
-    if [[ -n $(printenv TMUX) ]]
-    then
-        local window_name=$(tmux display -p '#{window_name}')
-        tmux rename-window -- "$*" # zsh specified
-        # tmux rename-window -- "${!#}" # for bash
-        command ssh $@
-        tmux rename-window $window_name
-    else
-        command ssh $@
-    fi
-}
-
-
 #################################################
 #           SSSS     SSSS     H   H             #
 #          S        S         H   H             #
@@ -329,5 +264,33 @@ if ssh-add -l >&/dev/null ; then
 else
     ssh-add
 fi
+
+
+# Override auto-title when static titles are desired ($ title My new title)
+title() { export TITLE_OVERRIDDEN=1; echo -en "\e]0;$*\a"}
+# Turn off static titles ($ autotitle)
+autotitle() { export TITLE_OVERRIDDEN=0 }; autotitle
+# Condition checking if title is overridden
+overridden() { [[ $TITLE_OVERRIDDEN == 1 ]]; }
+# Echo asterisk if git state is dirty
+gitDirty() { [[ $(git status 2> /dev/null | grep -o '\w\+' | tail -n1) != ("clean"|"") ]] && echo "*" }
+
+# Show cwd when shell prompts for input.
+tabtitle_precmd() {
+   if overridden; then return; fi
+   pwd=$(pwd) # Store full path as variable
+   cwd=${pwd##*/} # Extract current working dir only
+   print -Pn "\e]0;$cwd$(gitDirty)\a" # Replace with $pwd to show full path
+}
+[[ -z $precmd_functions ]] && precmd_functions=()
+precmd_functions=($precmd_functions tabtitle_precmd)
+
+# Prepend command (w/o arguments) to cwd while waiting for command to complete.
+tabtitle_preexec() {
+   if overridden; then return; fi
+   printf "\033]0;%s\a" "${1%% *} | $cwd$(gitDirty)" # Omit construct from $1 to show args
+}
+[[ -z $preexec_functions ]] && preexec_functions=()
+preexec_functions=($preexec_functions tabtitle_preexec)
 
 [[ -s "/Users/yatuhashi/.gvm/scripts/gvm" ]] && source "/Users/yatuhashi/.gvm/scripts/gvm"
