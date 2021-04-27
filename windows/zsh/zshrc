@@ -1,0 +1,326 @@
+### Added by Zinit's installer
+if [[ ! -f $HOME/.zinit/bin/zinit.zsh ]]; then
+    print -P "%F{33}▓▒░ %F{220}Installing %F{33}DHARMA%F{220} Initiative Plugin Manager (%F{33}zdharma/zinit%F{220})…%f"
+    command mkdir -p "$HOME/.zinit" && command chmod g-rwX "$HOME/.zinit"
+    command git clone https://github.com/zdharma/zinit "$HOME/.zinit/bin" && \
+        print -P "%F{33}▓▒░ %F{34}Installation successful.%f%b" || \
+        print -P "%F{160}▓▒░ The clone has failed.%f%b"
+fi
+source "$HOME/.zinit/bin/zinit.zsh"
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+# Load a few important annexes, without Turbo
+# (this is currently required for annexes)
+zinit light-mode for \
+    zinit-zsh/z-a-rust \
+    zinit-zsh/z-a-as-monitor \
+    zinit-zsh/z-a-patch-dl \
+    zinit-zsh/z-a-bin-gem-node
+### End of Zinit's installer chunk
+# Plugin
+zinit light zsh-users/zsh-autosuggestions
+zinit light zdharma/fast-syntax-highlighting
+zinit load zdharma/history-search-multi-word
+zinit ice wait'!0'; zplugin light "zsh-users/zsh-completions"
+zinit snippet PZT::modules/completion/init.zsh
+zinit ice wait'!0'; zplugin light "zsh-users/zsh-history-substring-search"
+zinit light "mafredri/zsh-async"
+zinit ice wait'!0'; zplugin light "peco/peco"
+zinit ice wait'!0'; zplugin light "vintersnow/anyframe"
+zinit ice wait'!0'; zplugin light "b4b4r07/enhancd"
+zinit ice wait"!0" atinit"zpcompinit; zpcdreplay"
+# Theme
+zplugin snippet OMZ::themes/steeef.zsh-theme
+setopt correct
+SPROMPT="( ´・ω・) ＜ %{$fg[blue]%}も%{${reset_color}%}%{$fg[red]%}し%{${reset_color}%}%{$fg[yellow]%}か%{${reset_color}%}%{$fg[green]%}し%{${reset_color}%}%{$fg[red]%}て%{${reset_color}%}: %{$fg[red]%}%r%{${reset_color}%}？ [(y)es,(n)o,(a)bort,(e)dit]
+-> "
+# Optimize
+if [ ~/.zshrc -nt ~/.zshrc.zwc ]; then
+   zcompile ~/.zshrc
+fi
+# --------------
+# enviroment vars
+# --------------
+if [[ -s "${ZDOTDIR:-$HOME}/.zshenv" ]]; then
+  zplugin ice wait"!1"; zplugin snippet "${ZDOTDIR:-$HOME}/.zshenv"
+#  source "${ZDOTDIR:-$HOME}/.zshenv"
+  zplugin ice wait"!1" atinit'eval "$(pyenv init -)"'
+fi
+# --------------
+# autosuggestions
+# --------------
+zstyle -s ':autosuggestions:color' found \
+  'ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE' || ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+#
+# Key Bindings
+#
+bindkey -e
+if [[ -n "$key_info" ]]; then
+  # vi
+  bindkey -M viins "$key_info[Control]F" vi-forward-word
+  bindkey -M viins "$key_info[Control]E" vi-add-eol
+fi
+# ----------------------------
+# zsh-history-substring-search
+# ----------------------------
+zstyle -s ':history-substring-search:color' found \
+  'HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND' \
+    || HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND='bg=magenta,fg=white,bold'
+zstyle -s ':history-substring-search:color' not-found \
+  'HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND' \
+    || HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND='bg=red,fg=white,bold'
+zstyle -s ':history-substring-search' globbing-flags \
+  'HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS' \
+    || HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS='i'
+if zstyle -t ':history-substring-search' case-sensitive; then
+  HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS="${HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS//i}"
+fi
+if ! zstyle -t ':history-substring-search' color; then
+  unset HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_{FOUND,NOT_FOUND}
+fi
+#bindkey '^[[A' history-substring-search-up
+#bindkey '^[[B' history-substring-search-down
+bindkey '^[OA' history-substring-search-up
+bindkey '^[OB' history-substring-search-down
+# --------------
+# cdr関連の設定
+# --------------
+setopt AUTO_PUSHD # cdしたら自動でディレクトリスタックする
+setopt pushd_ignore_dups # 同じディレクトリは追加しない
+DIRSTACKSIZE=100 # スタックサイズ
+# cdr, add-zsh-hook を有効にする
+autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
+add-zsh-hook chpwd chpwd_recent_dirs
+# --------------
+# 履歴関連の設定
+# --------------
+HISTFILE=~/.zsh_history #履歴ファイルの設定
+HISTSIZE=1000000 # メモリに保存される履歴の件数。(保存数だけ履歴を検索できる)
+SAVEHIST=1000000 # ファイルに何件保存するか
+setopt extended_history # 実行時間とかも保存する
+setopt share_history # 別のターミナルでも履歴を参照できるようにする
+setopt hist_ignore_all_dups # 過去に同じ履歴が存在する場合、古い履歴を削除し重複しない
+setopt hist_ignore_space # コマンド先頭スペースの場合保存しない
+setopt hist_verify # ヒストリを呼び出してから実行する間に一旦編集できる状態になる
+setopt hist_reduce_blanks #余分なスペースを削除してヒストリに記録する
+setopt hist_save_no_dups # histryコマンドは残さない
+setopt hist_expire_dups_first # 古い履歴を削除する必要がある場合、まず重複しているものから削除
+setopt hist_expand # 補完時にヒストリを自動的に展開する
+setopt inc_append_history # 履歴をインクリメンタルに追加
+# --------------
+# anyframeの設定
+# --------------
+# anyframeで明示的にpecoを使用するように定義
+zstyle ":anyframe:selector:" use peco
+# C-zでcd履歴検索後移動
+bindkey '^Z' anyframe-widget-cdr
+# C-rでコマンド履歴検索後実行
+bindkey '^R' anyframe-widget-put-history
+# --------------
+# ディレクトリ移動
+# --------------
+__call_precmds() {
+  type precmd > /dev/null 2>&1 && precmd
+  for __pre_func in $precmd_functions; do $__pre_func; done
+}
+#shift+upで親ディレクトリへ
+#shift+downで戻る
+__cd_up()   { builtin pushd ..; echo; __call_precmds; zle reset-prompt }
+__cd_undo() { builtin popd;     echo; __call_precmds; zle reset-prompt }
+zle -N __cd_up;   bindkey '^[[1;2A' __cd_up
+zle -N __cd_undo; bindkey '^[[1;2B' __cd_undo
+# --------------
+# ディレクトリ移動
+#  Do Redo
+#  +   -
+# --------------
+path_history=($(pwd))
+path_history_index=1
+path_history_size=1
+function push_path_history {
+    local curr_path
+    curr_path=$1
+    if [ $curr_path = $path_history[$path_history_index] ]; then
+        # do nothing
+    else
+        local path_history_cap
+        path_history_cap=$#path_history
+        if [ $path_history_index -eq $path_history_cap ]; then
+            local next_cap
+            next_cap=$(($path_history_cap * 2))
+            # ほんとに伸長されているかは不明
+            path_history[$next_cap]=
+        fi
+        path_history_index=$(($path_history_index+1))
+        path_history[$path_history_index]=$curr_path
+        path_history_size=$path_history_index
+    fi
+}
+function - {
+    if [ $path_history_index -eq 1 ]; then
+        # do nothing
+    else
+        path_history_index=$(($path_history_index-1))
+        local prev_path
+        prev_path=$path_history[$path_history_index]
+        cd $prev_path
+    fi
+}
+function + {
+    if [ $path_history_index -eq $path_history_size ]; then
+        # do nothing
+    else
+        path_history_index=$(($path_history_index+1))
+        local next_path
+        next_path=$path_history[$path_history_index]
+        cd $next_path
+    fi
+}
+function reset_path_history {
+    path_history=($(pwd))
+    path_history_index=1
+    path_history_size=1
+}
+function chpwd {
+    push_path_history $(pwd)
+}
+# --------------
+# SSH
+# --------------
+echo -n "ssh-agent: "
+if [ -e ~/.ssh-agent-info ]; then
+    source ~/.ssh-agent-info
+fi
+ssh-add -l >&/dev/null
+if [ $? = 2 ] ; then
+    echo -n "ssh-agent: restart...."
+    ssh-agent >~/.ssh-agent-info
+    source ~/.ssh-agent-info
+fi
+if ssh-add -l >&/dev/null ; then
+    echo "ssh-agent: Identity is already stored."
+else
+    ssh-add
+fi
+SSH_CONFIG=$HOME/.ssh/config
+function sshls(){
+	echo "known hosts:"
+	if test -e $SSH_CONFIG; then
+    	for i in `grep "^Host " $SSH_CONFIG | sed s/"^Host "//`
+    	do
+        	echo "  ${i};"
+    	done
+	else
+    		echo "nothing ssh-lsconfig file"
+	fi
+}
+# --------------
+# TMUX
+# --------------
+if [[ ! -n $TMUX ]]; then
+	if ((!`tmux ls | grep vscode | grep -v attached | wc -l`)); then
+    		tmux new -d -s "vscode-"`cat /dev/urandom | base64 | fold -w 5 | head -n 1`
+	fi
+	tsession=`tmux ls | grep vscode | grep -v attached | awk -F: '{print $1}'| head -n 1`
+	zplugin ice wait'!0'; tmux new -d -s "vscode-"`cat /dev/urandom | base64 | fold -w 5 | head -n 1`
+	tmux attach -t $tsession
+fi
+# --------------
+# alias
+# --------------
+# Rust
+if [[ -s "$HOME/.cargo/bin/exa" ]]; then
+	alias ls='exa'
+	alias lt='exa -T'
+	alias ll='exa -la'
+fi
+if [[ -s "$HOME/.cargo/bin/rg" ]]; then
+	alias grep='rg'
+fi
+if [[ -s "$HOME/.cargo/bin/bat" ]]; then
+	alias cat='bat -p'
+fi
+if [[ -s "$HOME/.cargo/bin/procs" ]]; then
+	alias ps='procs'
+fi
+#Git
+alias d='cd  ~/Develop/`ls ~/Develop | peco`'
+alias git-wrote-code-num="git log --numstat --pretty=\"%H\" --author='kenya yasui' --no-merges | awk 'NF==3 {plus+=\$1; minus+=\$2} END {printf(\"%d (+%d, -%d)\n\", plus+minus, plus, minus)}'"
+alias git-create-author-list="git log --name-status --diff-filter=A --format='> %aN' | awk '/^>/ {tagline=\$0} /^A/ {print tagline \"\\t\" \$0}' | sort"
+alias git-modify-author-list="git log --name-status --diff-filter=M --format='> %aN' | awk '/^>/ {tagline=\$0} /^M/ {print tagline \"\\t\" \$0}' | sort"
+alias git-conflict="git diff --name-only --diff-filter=U"
+alias ghc='stack ghc --'
+alias ghci='stack ghci --'
+alias t='tig'
+alias ta='tig --all'
+alias g='cd $(ghq root)/$(ghq list | peco)'
+#alias gh='hub browse $(ghq list | peco | cut -d "/" -f 2,3)'
+alias authimage='echo "https://www.google.com/chart?'
+alias goc='docker run -it -v `pwd`:/go golang go build'
+alias dc='docker'
+alias d-c='docker-compose'
+alias doc-c='docker-compose'
+alias runhaskell='stack runhaskell --'
+alias psa="ps aux"
+alias psg="ps aux | grep "
+alias brewu='brew update  && brew upgrade && brew cleanup && brew prune && brew doctor'
+alias cv='cd-bookmark'
+alias c='clear'
+alias u='cd ~/'
+alias p='pwd'
+alias h='history'
+alias z='vim ~/.zshrc'
+alias sp='tmux split-window -h'
+alias vs='tmux split-window -v'
+alias lla='ls -lah'
+alias num='ls -1 | wc -l'
+alias ks='ls -lah'
+alias pv='pyenv version'
+alias pvs='pyenv versions'
+alias noproxy='export http_proxy=""'
+alias noproxys='export https_proxy=""'
+alias gol= 'GOOS=linux GOARCH=amd64 go'
+alias gow= 'GOOS=windows GOARCH=amd64 go'
+alias ff='(){find . -type f | xargs -I{} sh -c "echo {}; cat {} | grep $1" }'
+alias myip='curl whatismyip.akamai.com; echo'
+alias mydns='curl -s whatismyip.akamai.com | xargs dig +short -x'
+alias dss="grep -v '^\s*#' | grep -v '^\s*$'"
+alias -s html=open
+alias -s py=python
+alias -s scala=scala
+alias -s {txt,memo,md}=vim
+alias -s dvi=dvipdfmx
+function gocode(){
+    echo 'fmt'$1
+    go fmt $1;
+    echo 'build'$1
+    go build $1;
+}
+alias -s go=gocode
+function runcpp () { g++ $1 && shift && ./a.out $@ }
+alias -s {c,cpp}=runcpp
+function extract() {
+    case $1 in
+        *.tar.gz|*.tgz) tar xzvf $1;;
+        *.tar.xz) tar Jxvf $1;;
+        *.zip) unzip $1;;
+        *.lzh) lha e $1;;
+        *.tar.bz2|*.tbz) tar xjvf $1;;
+        *.tar.Z) tar zxvf $1;;
+        *.gz) gzip -d $1;;
+        *.bz2) bzip2 -dc $1;;
+        *.Z) uncompress $1;;
+        *.tar) tar xvf $1;;
+        *.arj) unarj $1;;
+    esac
+}
+alias -s {gz,tgz,zip,lzh,bz2,tbz,Z,tar,arj,xz}=extract
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/home/yatuhashi/Build/google-cloud-sdk/path.zsh.inc' ]; then . '/home/yatuhashi/Build/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/home/yatuhashi/Build/google-cloud-sdk/completion.zsh.inc' ]; then . '/home/yatuhashi/Build/google-cloud-sdk/completion.zsh.inc'; fi
+
+alias open='/mnt/c/Windows/explorer.exe $1'
+alias code='/mnt/c/Users/yatuhashi/AppData/Local/Programs/Microsoft\ VS\ Code/bin/code $1'
